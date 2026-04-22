@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wolf Shack Cafe - Pickup Order</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+
+    <header class="hero" id="top">
+      <nav class="nav">
+        <div class="logo">
+          <span class="logo-mark">WS</span>
+          <div>
+            <p class="logo-title">Wolf Shack</p>
+            <p class="logo-subtitle">School Cafe Pickup</p>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="#menu">Menu</a>
+          <a href="#how">Pickup</a>
+          <a href="delivery.html">Delivery</a>
+        </div>
+        <div class="nav-cta">
+          <span class="status-pill">Pickup only</span>
+          <button class="cta" type="button" id="jumpToCart">View cart</button>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Fast, friendly, and ready for the bell.</p>
+          <h1>
+            Order ahead from the Wolf Shack and pick up without the line.
+          </h1>
+          <p class="subtext">
+            Build your order in seconds, choose a pickup time, and grab it on
+            your way to class. Fresh bowls, hot sandwiches, and our famous
+            cinnamon cold brew.
+          </p>
+          <div class="hero-actions">
+            <a class="cta" href="#menu">Start an order</a>
+            <a class="ghost" href="#how">How pickup works</a>
+          </div>
+          <div class="hero-badges">
+            <div>
+              <p class="badge-title">Pickup in</p>
+              <p class="badge-value" id="pickupEta">15 to 20 min</p>
+            </div>
+            <div>
+              <p class="badge-title">Average wait</p>
+              <p class="badge-value">Under 5 min</p>
+            </div>
+            <div>
+              <p class="badge-title">Most purchased today</p>
+              <p class="badge-value">Breakfast Burrito</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-card-top">
+            <span>Pickup today</span>
+            <span class="pill">Open until 3:30 PM</span>
+          </div>
+          <h2>Wolf Shack Favorites</h2>
+          <p class="hero-card-sub">
+            Popular picks from the Wolf Shack menu board.
+          </p>
+          <div class="specials">
+            <article>
+              <h3>Breakfast Burrito</h3>
+              <p>Bacon, two eggs, cheddar, roasted potatos, spinach, onion</p>
+              <span class="price">$8.00</span>
+            </article>
+            <article>
+              <h3>Classic Belgian Waffle</h3>
+              <p>Butter + syrup, add eggs + bacon for $5 more</p>
+              <span class="price">$5.00</span>
+            </article>
+          </div>
+          <button class="pill-btn" type="button" id="addSpecial">
+            Add a combo to cart
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="menu" class="menu">
+        <div class="section-title">
+          <h2>Wolf Shack Menu</h2>
+          <p>
+            Select a category, add your favorites, and customize pickup time.
+          </p>
+        </div>
+
+        <div class="menu-layout">
+          <div class="menu-panel">
+            <div class="search-row">
+              <label class="search" for="searchInput">
+                <span>Search</span>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Search sandwiches, bowls, drinks"
+                  autocomplete="off"
+                />
+              </label>
+              <div class="category-chips" id="categoryChips"></div>
+            </div>
+
+            <div class="menu-grid" id="menuGrid"></div>
+          </div>
+
+          <aside class="cart-panel" id="cartPanel">
+            <div class="cart-header">
+              <div>
+                <h3>Your pickup order</h3>
+                <p class="muted">Wolf Shack - Main Campus</p>
+              </div>
+              <button class="link" id="clearCart" type="button">Clear</button>
+            </div>
+
+            <div class="cart-items" id="cartItems"></div>
+
+            <div class="cart-summary">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal">$0.00</span>
+              </div>
+              <div class="summary-row">
+                <span>Estimated tax</span>
+                <span id="tax">$0.00</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total</span>
+                <span id="total">$0.00</span>
+              </div>
+            </div>
+
+            <div class="pickup-block">
+              <label for="pickupTime">Pickup time</label>
+              <select id="pickupTime"></select>
+              <label for="notes">Special instructions</label>
+              <textarea
+                id="notes"
+                rows="3"
+                placeholder="No onions, extra sauce, toast the bun"
+              ></textarea>
+            </div>
+
+            <button class="checkout" type="button" onclick="location.href='checkout.html'">
+              Checkout
+            </button>
+            <a class="delivery-link" href="delivery.html">Need delivery? Add classroom info +$3</a>
+            <p class="fine">Pay at pickup or with school account.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="how" class="how">
+        <div class="section-title">
+          <h2>How pickup works</h2>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-number">1</span>
+            <h3>Build your order</h3>
+            <p>Pick items, add notes, and choose a pickup time.</p>
+          </div>
+          <div class="step">
+            <span class="step-number">2</span>
+            <h3>We start cooking</h3>
+            <p>Wolf Shack staff preps your order right before pickup.</p>
+          </div>
+          <div class="step">
+            <span class="step-number">3</span>
+            <h3>Grab and go</h3>
+            <p>Head to the pickup shelf by the front counter.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <div>
+        <h3>Wolf Shack Cafe</h3>
+        <p>123 Campus Drive, Student Union</p>
+      </div>
+      <div>
+        <p>Open Mon to Fri, 7:00 AM to 3:30 PM</p>
+        <p>Questions? Ask at the front counter.</p>
+      </div>
+      <div class="footer-cta">
+        <h3>Become a Delivery Helper</h3>
+        <p class="muted">Earn $2 per successful order delivered.</p>
+        <a class="pill-btn" href="deliverer.html">Apply to deliver</a>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
