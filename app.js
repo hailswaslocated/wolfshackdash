@@ -4,7 +4,7 @@ const menuItems = [
     name: "Breakfast Burrito",
     description:
       "Bacon, two eggs, cheddar, topped with roasted potatos, spinach, onion and a hint of 1000 island sauce.",
-    price: 8,
+    price: 9,
     category: "Breakfast",
     tags: ["Available 8-11 AM"],
     addons: [
@@ -18,7 +18,7 @@ const menuItems = [
     name: "Breakfast Bowl",
     description:
       "Bacon, two eggs, cheddar, topped with roasted potatos, spinach, onion and a hint of 1000 island sauce.",
-    price: 8,
+    price: 9,
     category: "Breakfast",
     tags: ["Available 8-11 AM"],
     addons: [
@@ -32,7 +32,7 @@ const menuItems = [
     name: "Breakfast Sandwich",
     description:
       "Bacon, two eggs, cheddar, topped with roasted potatos, spinach, onion and a hint of 1000 island sauce.",
-    price: 8,
+    price: 9,
     category: "Breakfast",
     tags: ["Available 8-11 AM"],
     addons: [
@@ -49,7 +49,7 @@ const menuItems = [
     category: "Breakfast",
     tags: ["Waffle"],
     addons: [
-      { name: "Add 2 eggs + bacon", price: 5 },
+      { name: "Breakfast combo (2 eggs + 2 bacon)", price: 5 },
       { name: "Whipped cream", price: 1 },
       { name: "Extra syrup", price: 1 },
       { name: "Fresh berries", price: 1 }
@@ -63,7 +63,7 @@ const menuItems = [
     category: "Breakfast",
     tags: ["Waffle", "Popular"],
     addons: [
-      { name: "Add 2 eggs + bacon", price: 5 },
+      { name: "Breakfast combo (2 eggs + 2 bacon)", price: 5 },
       { name: "Whipped cream", price: 1 },
       { name: "Extra syrup", price: 1 },
       { name: "Fresh berries", price: 1 }
@@ -77,7 +77,7 @@ const menuItems = [
     category: "Breakfast",
     tags: ["Waffle"],
     addons: [
-      { name: "Add 2 eggs + bacon", price: 5 },
+      { name: "Breakfast combo (2 eggs + 2 bacon)", price: 5 },
       { name: "Whipped cream", price: 1 },
       { name: "Extra syrup", price: 1 },
       { name: "Fresh berries", price: 1 }
@@ -171,7 +171,7 @@ const menuItems = [
     id: "drink-2",
     name: "Chai & Matcha",
     description: "Hot or iced. Iced +$1.",
-    price: 4.5,
+    price: 5,
     category: "Hot / Iced Drinks",
     tags: ["Drink"],
     addons: [{ name: "Iced upgrade", price: 1 }]
@@ -189,7 +189,7 @@ const menuItems = [
     id: "drink-4",
     name: "Latte / Cappuccino",
     description: "Hot or iced. Iced +$1.",
-    price: 4.5,
+    price: 5,
     category: "Hot / Iced Drinks",
     tags: ["Drink"],
     addons: [{ name: "Iced upgrade", price: 1 }]
@@ -464,11 +464,17 @@ const buildPickupTimes = () => {
       .join("")}
   `;
 
-  pickupEta.textContent = "15 to 20 min";
+  const savedPickupTime = localStorage.getItem("wolfshack-pickup-time") || "asap";
+  pickupTime.value = savedPickupTime;
+  handlePickupChange();
+
+  const savedNotes = localStorage.getItem("wolfshack-notes") || "";
+  notes.value = savedNotes;
 };
 
 const handlePickupChange = () => {
   const value = pickupTime.value;
+  localStorage.setItem("wolfshack-pickup-time", value);
   if (value === "asap") {
     pickupEta.textContent = "15 to 20 min";
   } else {
@@ -528,7 +534,9 @@ jumpToCart.addEventListener("click", () => {
 });
 
 pickupTime.addEventListener("change", handlePickupChange);
-notes.addEventListener("input", () => {});
+notes.addEventListener("input", (event) => {
+  localStorage.setItem("wolfshack-notes", event.target.value);
+});
 
 renderChips();
 renderMenu();

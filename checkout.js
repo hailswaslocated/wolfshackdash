@@ -24,6 +24,13 @@ const readCart = () => {
   }
 };
 
+const readOrderMeta = () => {
+  return {
+    pickupTime: localStorage.getItem("wolfshack-pickup-time") || "asap",
+    notes: localStorage.getItem("wolfshack-notes") || ""
+  };
+};
+
 const renderSummary = () => {
   const cart = readCart();
   if (!cart.items.length) {
@@ -102,6 +109,7 @@ const initSquare = async () => {
 
 const pay = async (card) => {
   const cart = readCart();
+  const orderMeta = readOrderMeta();
   if (!cart.total) {
     setStatus("Your cart is empty. Add items first.");
     return;
@@ -120,7 +128,10 @@ const pay = async (card) => {
     body: JSON.stringify({
       token: result.token,
       amount: Math.round(cart.total * 100),
-      currency: "USD"
+      currency: "USD",
+      items: cart.items,
+      pickupTime: orderMeta.pickupTime,
+      notes: orderMeta.notes
     })
   });
 
@@ -130,7 +141,14 @@ const pay = async (card) => {
     return;
   }
 
-  setStatus("Payment successful! Order received.");
+  const orderId = data.orderId || data?.payment?.id;
+  if (orderId) {
+    localStorage.setItem("wolfshack-last-order-id", orderId);
+  }
+  setStatus("Payment successful! Redirecting to your pickup status.");
+  window.location.href = orderId
+    ? `order-status.html?orderId=${encodeURIComponent(orderId)}`
+    : "order-status.html";
 };
 
 const start = async () => {

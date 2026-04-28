@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wolf Shack Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+
+    <header class="hero">
+      <nav class="nav">
+        <div class="logo">
+          <span class="logo-mark">WS</span>
+          <div>
+            <p class="logo-title">Wolf Shack</p>
+            <p class="logo-subtitle">Admin Panel</p>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Menu</a>
+          <a href="checkout.html">Checkout</a>
+          <a href="order-status.html">Status</a>
+        </div>
+        <div class="nav-cta">
+          <span class="status-pill">Kitchen queue</span>
+          <button class="cta" id="printQueue" type="button">Print queue</button>
+        </div>
+      </nav>
+
+      <div class="hero-grid admin-layout">
+        <div class="hero-copy">
+          <p class="eyebrow">Order management</p>
+          <h1>Track every order in one place.</h1>
+          <p class="subtext">
+            This admin screen shows live orders, pickup notes, and quick status
+            controls so the kitchen can keep the line moving.
+          </p>
+          <div class="admin-stats" id="adminStats"></div>
+        </div>
+
+        <div class="hero-card admin-toolbox">
+          <div class="hero-card-top">
+            <span>Filters</span>
+            <span class="pill" id="lastRefresh">Refreshing...</span>
+          </div>
+          <div class="admin-controls">
+            <input
+              type="text"
+              id="searchOrders"
+              placeholder="Search order ID, item, note..."
+            />
+            <div class="filter-row" id="statusFilters">
+              <button class="chip active" data-status="all">All</button>
+              <button class="chip" data-status="paid">Paid</button>
+              <button class="chip" data-status="ready">Ready</button>
+              <button class="chip" data-status="completed">Completed</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-board">
+        <div class="section-title">
+          <h2>Orders</h2>
+          <p>Tap an order to see the items and update its status.</p>
+        </div>
+        <div class="order-board" id="orderBoard"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <h3>Wolf Shack Cafe</h3>
+        <p>123 Campus Drive, Student Union</p>
+      </div>
+      <div>
+        <p>Admin view for current orders and pickup workflow.</p>
+      </div>
+    </footer>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

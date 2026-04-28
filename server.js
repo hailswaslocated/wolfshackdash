@@ -37,6 +37,8 @@ const baseUrl =
     ? "https://connect.squareup.com"
     : "https://connect.squareupsandbox.com";
 
+const orderStore = new Map();
+
 const mimeTypes = {
   ".html": "text/html",
   ".css": "text/css",
@@ -77,6 +79,59 @@ const createPayment = async ({ token, amount, currency }) => {
   return { status: response.status, data };
 };
 
+const listOrders = () => {
+  return Array.from(orderStore.values()).sort((a, b) => {
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+  });
+};
+
+const tryExtractOrderId = (payload) => {
+  return (
+    payload?.data?.object?.payment?.id ||
+    payload?.data?.object?.order?.id ||
+    payload?.payment?.id ||
+    payload?.order?.id ||
+    payload?.paymentId ||
+    payload?.orderId ||
+    null
+  );
+};
+
+const markOrderReady = (orderId) => {
+  if (!orderId) return false;
+  const current = orderStore.get(orderId) || {
+    id: orderId,
+    createdAt: new Date().toISOString()
+  };
+  orderStore.set(orderId, {
+    ...current,
+    status: "ready",
+    readyAt: new Date().toISOString(),
+    message: "Your order is ready for pickup."
+  });
+  return true;
+};
+
+const updateOrderStatus = (orderId, status) => {
+  if (!orderId || !orderStore.has(orderId)) return null;
+  const current = orderStore.get(orderId);
+  const next = {
+    ...current,
+    status,
+    updatedAt: new Date().toISOString()
+  };
+  if (status === "ready") {
+    next.readyAt = next.readyAt || next.updatedAt;
+    next.message = "Your order is ready for pickup.";
+  }
+  if (status === "completed") {
+    next.completedAt = next.updatedAt;
+    next.message = "Order completed.";
+  }
+  orderStore.set(orderId, next);
+  return next;
+};
+
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/api/config") {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -87,6 +142,55 @@ const server = http.createServer(async (req, res) => {
         environment: SQUARE_ENV
       })
     );
+    return;
+  }
+
+  if (req.method === "GET" && req.url.startsWith("/api/order-status")) {
+    const url = new URL(req.url, "http://localhost");
+    const orderId = url.searchParams.get("orderId");
+    const order = orderId ? orderStore.get(orderId) : null;
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify(
+        order || {
+          status: "pending",
+          message: "Your order is being prepared."
+        }
+      )
+    );
+    return;
+  }
+
+  if (req.method === "GET" && req.url === "/api/admin/orders") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ orders: listOrders() }));
+    return;
+  }
+
+  if (req.method === "POST" && req.url.startsWith("/api/admin/orders/") && req.url.endsWith("/status")) {
+    try {
+      const match = req.url.match(/^\/api\/admin\/orders\/([^/]+)\/status$/);
+      const orderId = match?.[1] ? decodeURIComponent(match[1]) : null;
+      const body = await readBody(req);
+      const payload = JSON.parse(body || "{}");
+      const status = String(payload.status || "").toLowerCase();
+      if (!orderId || !["paid", "ready", "completed"].includes(status)) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Invalid order or status." }));
+        return;
+      }
+      const updated = updateOrderStatus(orderId, status);
+      if (!updated) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Order not found." }));
+        return;
+      }
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ order: updated }));
+    } catch (error) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Unable to update order." }));
+    }
     return;
   }
 
@@ -124,8 +228,29 @@ const server = http.createServer(async (req, res) => {
         amount: payload.amount,
         currency: payload.currency || "USD"
       });
+
+      const paymentId = data?.payment?.id || null;
+      if (status >= 200 && status < 300 && paymentId) {
+        orderStore.set(paymentId, {
+          id: paymentId,
+          status: "paid",
+          total: payload.amount,
+          currency: payload.currency || "USD",
+          items: Array.isArray(payload.items) ? payload.items : [],
+          pickupTime: payload.pickupTime || "asap",
+          notes: payload.notes || "",
+          createdAt: new Date().toISOString(),
+          message: "We received your payment and are preparing your order."
+        });
+      }
+
       res.writeHead(status, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(data));
+      res.end(
+        JSON.stringify({
+          ...data,
+          orderId: paymentId
+        })
+      );
     } catch (error) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(
@@ -133,6 +258,39 @@ const server = http.createServer(async (req, res) => {
           errors: [{ detail: "Server error processing payment." }]
         })
       );
+    }
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/api/webhooks/square") {
+    try {
+      const body = await readBody(req);
+      const payload = JSON.parse(body || "{}");
+      const orderId = tryExtractOrderId(payload);
+      const eventType = payload?.type || payload?.event_type || "";
+      const fulfillmentStatus =
+        payload?.data?.object?.order?.fulfillments?.[0]?.state ||
+        payload?.data?.object?.order?.state ||
+        payload?.data?.object?.payment?.status ||
+        "";
+
+      if (
+        orderId &&
+        (eventType.includes("order") ||
+          eventType.includes("payment") ||
+          String(fulfillmentStatus).toUpperCase().includes("READY") ||
+          String(fulfillmentStatus).toUpperCase().includes("COMPLET"))
+      ) {
+        const ready = String(fulfillmentStatus).toUpperCase().includes("READY") ||
+          String(fulfillmentStatus).toUpperCase().includes("COMPLET");
+        if (ready) markOrderReady(orderId);
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (error) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: false }));
     }
     return;
   }
